@@ -11,6 +11,43 @@ export const getAllExpenses=async(req,res)=>{
     
 }
 
+//get total expenses
+export const getTotalExpenses=async(req,res)=>{
+    try {
+        const totalExpenses= await Expense.aggregate([
+            {
+                $group:{
+                    _id:null,
+                    totalAmount:{$sum:"$amount"}
+                }
+            }
+        ])
+        const total = totalExpenses.length>0 ? totalExpenses[0].totalAmount : 0
+        res.status(200).json({ total, message: "Total expenses fetched successfully" })
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+//get total expense for each category
+export const getExpenseByCategory =async(req,res)=>{
+    try {
+        const totalExpense = await Expense.aggregate([
+            {
+                $group:{
+                    _id:'$category',
+                    totalAmount:{$sum:'$amount'}
+                }
+            }
+        ])
+        res.status(200).json({ totalExpense, message: "Total expenses by category fetched successfully" });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+    
+}
+
+
 // add a new expense
 export const addExpense=async(req,res)=>{
     const {amount,category,description}=req.body
